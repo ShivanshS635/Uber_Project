@@ -1,17 +1,19 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
 import Start from './pages/Start';
+import Riding from './pages/Riding';
 import UserLogin from './pages/UserLogin';
 import UserSignup from './pages/UserSignup';
-import CaptainLogin from './pages/CaptainLogin';
-import CaptainSignup from './pages/CaptainSignup';
-import Home from './pages/Home';
-import UserProtectWrapper from './pages/UserProtectWrapper';
 import UserLogout from './pages/UserLogout';
-import CaptainLogout from './pages/CaptainLogout';
-import CaptainProtectWrapper from './pages/CaptainProtectWrapper';
 import CaptainHome from './pages/CaptainHome';
-import Riding from './pages/Riding';
+import CaptainLogin from './pages/CaptainLogin';
+import { Routes, Route } from 'react-router-dom';
+import CaptainSignup from './pages/CaptainSignup';
+import CaptainLogout from './pages/CaptainLogout';
+import UserProtectWrapper from './pages/UserProtectWrapper';
+import CaptainProtectWrapper from './pages/CaptainProtectWrapper';
+
+
 
 const App = () => {
   return (
@@ -47,7 +49,7 @@ const App = () => {
           </CaptainProtectWrapper>
         }/>
 
-        <Route path='/riding' element={<Riding/>}/>
+        
       </Routes>
     </div>
   )
