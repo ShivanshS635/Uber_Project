@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import CaptainDetails from '../components/CaptainDetails'
 import RidePopUp from '../components/RidePopUp'
@@ -6,14 +6,52 @@ import { useState, useRef } from 'react'
 import { gsap } from 'gsap' 
 import { useGSAP } from '@gsap/react'
 import ConfirmRidePopUp from '../components/ConfirmRidePopUp'
+import { useContext } from 'react'
+import { SocketContext } from '../context/SocketContext'
+import { CaptainDataContext } from '../context/CaptainContext'
+
 
 const CaptainHome = () => {
 
   const [ridePopupPanel, setRidePopupPanel] = useState(true);
   const ridePopupPanelRef = useRef(null);
 
-  const [confirmRidePopupPanel, setConfirmRidePopupPanel] = useState(true);
+  const [confirmRidePopupPanel, setConfirmRidePopupPanel] = useState(false);
   const confirmRidePopupPanelRef = useRef(null);
+
+  const { socket } = useContext(SocketContext)
+  const { captain } = useContext(CaptainDataContext)
+
+  useEffect(() => {
+    socket.emit('join', {
+      userId: captain._id,
+      userType: 'captain'
+    })
+    const updateLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+
+          socket.emit('update-location-captain', {
+            userId: captain._id,
+            location: {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            }
+          })
+        })
+      }
+    }
+
+    const locationInterval = setInterval(updateLocation, 10000)
+    updateLocation()
+
+  }, [])
+
+  socket.on('new-ride', (data) => {
+    setRide(data)
+    setRidePopupPanel(true)
+  })
+  
 
   useGSAP(function () {
     if (ridePopupPanel) {
@@ -44,8 +82,8 @@ const CaptainHome = () => {
         <div className='fixed p-6 top-0 flex items-center justify-between w-screen'>
           <img className='w-16' src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png" alt="" />
                 
-          <Link to='/home' className='fixed right-2 top-2 h-10 w-10 bg-white flex items-center justify-center rounded-full'>
-          <i className="text-lg font-medium ri-logout-box-r-line"></i>
+          <Link to='/captain-home' className='fixed right-2 top-2 h-10 w-10 bg-white flex items-center justify-center rounded-full'>
+            <i className="text-lg font-medium ri-logout-box-r-line"></i>
           </Link>
         </div>
         
@@ -61,6 +99,7 @@ const CaptainHome = () => {
         <div ref={ridePopupPanelRef} className='fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-6 pt-12'>
           <RidePopUp
             setRidePopupPanel={setRidePopupPanel}
+            setConfirmRidePopupPanel={setConfirmRidePopupPanel} 
           />
         </div>
 
