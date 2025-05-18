@@ -16,6 +16,7 @@ import CaptainRiding from './pages/CaptainRiding';
 
 
 
+
 const App = () => {
   return (
     <div>
@@ -25,6 +26,7 @@ const App = () => {
         <Route path='/signup' element={<UserSignup/>}/>
         <Route path='/captainLogin' element={<CaptainLogin/>}/>
         <Route path='/captainSignup' element={<CaptainSignup/>}/>
+        <Route path='/riding' element={<Riding/>}/>
 
         <Route path='/home' element={
           <UserProtectWrapper>

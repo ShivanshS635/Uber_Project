@@ -13,6 +13,8 @@ import axios from 'axios'
 import { SocketContext } from '../context/SocketContext'
 import { useContext } from 'react'
 import { UserDataContext } from '../context/UserContext'
+import { useNavigate } from 'react-router-dom'
+import LiveTracking from '../components/LiveTracking'
 
 const Home = () => {
 
@@ -42,9 +44,23 @@ const Home = () => {
   const { socket } = useContext(SocketContext)
   const { user } = useContext(UserDataContext)
 
+  const navigate = useNavigate()
+
   useEffect(() => {
-    socket.emit("join", { userType: "user", userId: user._id })
+    socket.emit("join", { userType: "user", userId: user?._id })
   }, [ user ])
+
+  socket.on('ride-confirmed', ride => {
+    setVehicleFound(false)
+    setWaitingForDriver(true)
+    setRide(ride)
+  })
+
+  socket.on('ride-started', ride => {
+    console.log("ride")
+    setWaitingForDriver(false)
+    navigate('/riding', { state: { ride } }) 
+  })
   
 
   const handlePickupChange = async (e) => {
@@ -65,7 +81,7 @@ const Home = () => {
 
       })
       setPickupSuggestions(response.data)
-    } catch {
+    } catch(error) {
         console.error(error);
     }
   }
@@ -87,7 +103,7 @@ const Home = () => {
         }
       })
       setDestinationSuggestions(response.data)
-    } catch {
+    } catch(error) {
         console.error(error);
     }
   }
@@ -198,9 +214,9 @@ const Home = () => {
     <div className='h-screen relative overflow-hidden'>
       
       <img className='w-16 absolute left-5 top-5' src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png" alt="" />
-      {/* temporary image */}
+      {/* location panel */}
       <div className='h-screen w-screen'>
-        <img className='h-screen w-screen object-cover' src="https://simonpan.com/wp-content/themes/sp_portfolio/assets/uber-challenge.jpg" alt="" />
+        <LiveTracking />
       </div>
 
 
