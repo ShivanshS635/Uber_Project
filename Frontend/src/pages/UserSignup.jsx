@@ -12,6 +12,7 @@ const UserSignup = () => {
   const [ firstName, setFirstName ] = useState('')
   const [ lastName, setLastName ] = useState('')
   const [ userData, setUserData ] = useState({})
+  const [ showPassword, setShowPassword ] = useState(false);
 
   const navigate = useNavigate();
 
@@ -99,9 +100,19 @@ const UserSignup = () => {
               onChange={(e) => {
                 setPassword(e.target.value)
               }}
-              required type="password"
+              required
+              type={showPassword ? 'text' : 'password'}
               placeholder='password'
             />
+            <div className='mb-7'>
+              <input
+                type='checkbox'
+                id='showPassword'
+                checked={showPassword}
+                onChange={() => setShowPassword(!showPassword)}
+              />
+              <label htmlFor='showPassword' className='ml-2 text-sm'>Show Password</label>
+            </div>
 
             <button
               className='bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base'
