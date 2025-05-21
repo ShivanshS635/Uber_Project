@@ -173,7 +173,7 @@ const CaptainHome = () => {
       {/* Ride Popup */}
       <div 
         ref={ridePopupPanelRef} 
-        className='fixed w-full z-20 bottom-0 translate-y-full bg-white px-3 py-6 pt-12 rounded-t-2xl shadow-lg'
+        className='fixed w-full z-9999 bottom-0 translate-y-full bg-white px-3 py-6 pt-12 rounded-t-2xl shadow-lg'
       >
         <RidePopUp
           ride={ride}
