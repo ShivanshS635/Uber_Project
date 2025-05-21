@@ -19,9 +19,11 @@ const LiveTracking = ({ ride }) => {
   const [currentPosition, setCurrentPosition] = useState(defaultCenter);
   const [driverPosition, setDriverPosition] = useState(null);
   const [routePath, setRoutePath] = useState([]);
+  const [mapLoaded, setMapLoaded] = useState(false);
   const { socket } = useContext(SocketContext);
   const { user } = useContext(UserDataContext);
 
+  // Initialize geolocation tracking
   useEffect(() => {
     if (!navigator.geolocation) {
       console.error("Geolocation is not supported by your browser");
@@ -35,6 +37,7 @@ const LiveTracking = ({ ride }) => {
         lng: longitude
       });
 
+      // Emit position to server if user is a driver
       if (user?.userType === 'driver') {
         socket.emit('position-update', { 
           userId: user._id,
@@ -47,11 +50,13 @@ const LiveTracking = ({ ride }) => {
       console.error("Geolocation error:", error);
     };
 
+    // Get initial position
     navigator.geolocation.getCurrentPosition(successHandler, errorHandler, {
       enableHighAccuracy: true,
       timeout: 5000
     });
 
+    // Set up watch for continuous updates
     const watchId = navigator.geolocation.watchPosition(
       successHandler, 
       errorHandler, 
@@ -64,11 +69,13 @@ const LiveTracking = ({ ride }) => {
     return () => navigator.geolocation.clearWatch(watchId);
   }, [user]);
 
+  // Listen for driver updates if this is a passenger view
   useEffect(() => {
     if (user?.userType === 'user' && ride?.driverId) {
       socket.on('driver-position', (position) => {
         setDriverPosition(position);
         
+        // Simulate route path (in a real app, you'd get this from Directions API)
         if (currentPosition && position) {
           setRoutePath([currentPosition, position]);
         }
@@ -80,7 +87,10 @@ const LiveTracking = ({ ride }) => {
     };
   }, [ride, currentPosition]);
 
+  // Custom marker icons - only called after map is loaded
   const getMarkerIcon = () => {
+    if (!mapLoaded) return null;
+    
     return {
       path: window.google.maps.SymbolPath.CIRCLE,
       fillColor: user?.userType === 'driver' ? '#4285F4' : '#34A853',
@@ -91,11 +101,18 @@ const LiveTracking = ({ ride }) => {
     };
   };
 
+  // Driver marker icon - only called after map is loaded
   const getDriverMarkerIcon = () => {
+    if (!mapLoaded) return null;
+    
     return {
       url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
       scaledSize: new window.google.maps.Size(32, 32)
     };
+  };
+
+  const handleMapLoad = () => {
+    setMapLoaded(true);
   };
 
   return (
@@ -118,26 +135,34 @@ const LiveTracking = ({ ride }) => {
             }
           ]
         }}
+        onLoad={handleMapLoad}
       >
-        <Marker
-          position={currentPosition}
-          icon={getMarkerIcon()}
-        />
-        {driverPosition && user?.userType === 'user' && (
+        {/* User/Driver position marker */}
+        {mapLoaded && (
           <>
             <Marker
-              position={driverPosition}
-              icon={getDriverMarkerIcon()}
+              position={currentPosition}
+              icon={getMarkerIcon()}
             />
-            <Polyline
-              path={routePath}
-              options={{
-                strokeColor: '#4285F4',
-                strokeOpacity: 0.7,
-                strokeWeight: 4,
-                geodesic: true
-              }}
-            />
+
+            {/* Driver position marker (for passenger view) */}
+            {driverPosition && user?.userType === 'user' && (
+              <>
+                <Marker
+                  position={driverPosition}
+                  icon={getDriverMarkerIcon()}
+                />
+                <Polyline
+                  path={routePath}
+                  options={{
+                    strokeColor: '#4285F4',
+                    strokeOpacity: 0.7,
+                    strokeWeight: 4,
+                    geodesic: true
+                  }}
+                />
+              </>
+            )}
           </>
         )}
       </GoogleMap>
