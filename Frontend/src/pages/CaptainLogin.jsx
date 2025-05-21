@@ -88,6 +88,9 @@ const CaptainLogin = () => {
               )}
             </button>
           </div>
+          <div className='mb-7 flex items-center justify-end'>
+            <Link to='/forgot-password' className='text-blue-600 text-sm'>Forgot Password?</Link>
+          </div>
 
           <button
             className='bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base'
