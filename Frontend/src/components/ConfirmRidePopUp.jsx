@@ -132,7 +132,7 @@ const ConfirmRidePopUp = ({ ride, setConfirmRidePopupPanel, setRidePopupPanel })
             type="text"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Enter 4-digit OTP"
-            maxLength={4}
+            maxLength={6}
           />
           {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
         </div>
