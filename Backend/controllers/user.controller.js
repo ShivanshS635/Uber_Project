@@ -2,6 +2,8 @@ const userModel = require('../models/user.model');
 const userService = require('../services/user.service');
 const { validationResult } = require('express-validator');
 const blackListTokenModel = require('../models/blacklistToken.model');
+const crypto = require('crypto');
+const sendEmail = require('../utils/sendEmail');
 
 // controller for the registration of the user
 module.exports.registerUser = async (req , res , next) => {
@@ -70,3 +72,50 @@ module.exports.logoutUser = async (req , res , next) => {
     await blackListTokenModel.create({ token });
     res.status(200).json({ message: 'Logged out successfully' });
 }
+
+module.exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  const user = await userModel.findOne({ email });
+
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  // Generate token
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  const resetTokenExpiry = Date.now() + 15 * 60 * 1000; // 15 mins
+
+  user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+  user.resetPasswordExpires = resetTokenExpiry;
+  await user.save();
+
+  const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+  const message = `Reset your password using this link: ${resetUrl}`;
+
+  await sendEmail(user.email, 'Password Reset Request', message);
+
+  res.status(200).json({ message: 'Password reset email sent' });
+};
+
+module.exports.resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  const user = await userModel.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpires: { $gt: Date.now() }
+  });
+
+  if (!user) {
+    return res.status(400).json({ message: 'Invalid or expired token' });
+  }
+
+  user.password = await userModel.hashPassword(password);
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+  await user.save();
+
+  res.status(200).json({ message: 'Password reset successful' });
+};

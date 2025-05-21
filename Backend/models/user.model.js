@@ -28,7 +28,12 @@ const userSchema = new mongoose.Schema({
     socketId: {
         type: String,
     },
-    
+    resetPasswordToken: {
+        type: String,
+    },
+    resetPasswordExpires: {
+        type: Date,
+    },
 })
 
 userSchema.methods.generateAuthToken = function(){

@@ -14,6 +14,8 @@ import UserProtectWrapper from './pages/UserProtectWrapper';
 import CaptainProtectWrapper from './pages/CaptainProtectWrapper';
 import CaptainRiding from './pages/CaptainRiding';
 import CaptainProfile from './pages/CaptainProfile';
+import ResetPassword from './pages/ResetPassword';
+import ForgotPassword from './pages/ForgotPassword';
 
 
 
@@ -28,6 +30,8 @@ const App = () => {
         <Route path='/captainLogin' element={<CaptainLogin/>}/>
         <Route path='/captainSignup' element={<CaptainSignup/>}/>
         <Route path='/riding' element={<Riding/>}/>
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path='/forgot-password' element={<ForgotPassword />} />
 
         <Route path='/home' element={
           <UserProtectWrapper>
